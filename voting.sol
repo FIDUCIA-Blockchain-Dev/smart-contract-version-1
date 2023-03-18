@@ -5,6 +5,7 @@ contract voting{
     address public chairperson;
     struct Voters{
         bool voted;
+        bool registered;
         address delegate;
         uint vote;
         uint weight;
@@ -19,23 +20,30 @@ contract voting{
     }
 
     Candidates[]  public candidates;
-
-    constructor(string[] memory members)  {
+    string[] public a = ["yatin","sachin"];
+    uint public candidatescount;
+    constructor()  {
             chairperson = msg.sender;
             voters[chairperson].weight = 1;
-            for(uint i=0;i<members.length;i++)
-            {
-                candidates.push(Candidates({
-                        candidate_name: members[i],no_of_votes:0
+            
+            candidates.push(Candidates({
+                        candidate_name: "yatin",no_of_votes:0
                 }));
-            }
+                candidates.push(Candidates({
+                        candidate_name: "sachin",no_of_votes:0
+                }));
+                candidatescount = candidates.length;
     }
-
-    function register(address voter) public
+    function getcandidates() public view returns (Candidates[] memory){
+        return candidates;
+    }
+    function register() public
     {
-        require(msg.sender == chairperson);
+        address voter = msg.sender;
         require(voters[voter].voted == false);
+        require(voters[voter].registered==false);
         voters[voter].weight = 1;
+        voters[voter].registered = true;
     }
 
     function voting_process(uint vo) public 
@@ -64,4 +72,6 @@ contract voting{
                
         }
     }
+
+    
 }
