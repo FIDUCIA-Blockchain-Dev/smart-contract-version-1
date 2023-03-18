@@ -22,7 +22,9 @@ contract voting{
     Candidates[]  public candidates;
     string[] public a = ["yatin","sachin"];
     uint public candidatescount;
+    uint starttime;
     constructor()  {
+            starttime = block.timestamp;
             chairperson = msg.sender;
             voters[chairperson].weight = 1;
             
@@ -38,8 +40,9 @@ contract voting{
         return candidates;
     }
     function register() public
-    {
+    {   
         address voter = msg.sender;
+        require(block.timestamp<= starttime + 2 minutes);
         require(voters[voter].voted == false);
         require(voters[voter].registered==false);
         voters[voter].weight = 1;
@@ -47,7 +50,7 @@ contract voting{
     }
 
     function voting_process(uint vo) public 
-    {
+    {       require(block.timestamp>= starttime + 2 minutes && block.timestamp<= starttime + 4 minutes);
             require(voters[msg.sender].weight !=0);
             require(!voters[msg.sender].voted);
 
@@ -60,7 +63,7 @@ contract voting{
     }
 
     function reveal_winner() public view returns (uint winning_candidate)
-    {
+    {   require(block.timestamp>=starttime + 5 minutes);
         uint winningvotecounts = 0;
         for(uint i=0;i<candidates.length;i++)
         {
@@ -72,6 +75,7 @@ contract voting{
                
         }
     }
+    
 
     
 }
