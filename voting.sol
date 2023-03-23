@@ -20,9 +20,11 @@ contract voting{
     }
 
     Candidates[]  public candidates;
+    Candidates[] public tiebreakers;
     string[] public a = ["yatin","sachin"];
     uint public candidatescount;
     uint starttime;
+   
     constructor()  {
             starttime = block.timestamp;
             chairperson = msg.sender;
@@ -62,8 +64,9 @@ contract voting{
             
     }
 
-    function reveal_winner() public view returns (uint winning_candidate)
+    function reveal_winner() public view  returns (uint winning_candidate)
     {   require(block.timestamp>=starttime + 5 minutes);
+    require(tiebreakers.length == 1);
         uint winningvotecounts = 0;
         for(uint i=0;i<candidates.length;i++)
         {
@@ -74,6 +77,42 @@ contract voting{
                 }
                
         }
+        
+      
+    }
+    function tiecalculate() public
+    {
+        uint winningvotecounts = 0;
+      
+        for(uint i=0;i<candidates.length;i++)
+        {
+                if(winningvotecounts<candidates[i].no_of_votes)
+                {
+                    winningvotecounts = candidates[i].no_of_votes;
+                   
+                }
+               
+        }
+       
+        for(uint i=0;i<candidates.length;i++)
+        {
+            if(winningvotecounts == candidates[i].no_of_votes)
+            {
+                tiebreakers.push(Candidates({
+                    candidate_name: candidates[i].candidate_name,
+                    no_of_votes: candidates[i].no_of_votes
+                }));
+            }
+        }
+    }
+
+   
+    function tie(uint v) public
+    {
+        require(msg.sender == chairperson);
+        require(tiebreakers.length>1);
+        
+        candidates[v].no_of_votes += 1;
     }
     
 
