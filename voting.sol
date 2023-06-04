@@ -21,9 +21,10 @@ contract voting{
 
     Candidates[]  public candidates;
     Candidates[] public tiebreakers;
-    string[] public a = ["yatin","sachin"];
+    address[] public voter_address;
     uint public candidatescount;
-    uint starttime;
+    uint public starttime;
+   
    
     constructor()  {
             starttime = block.timestamp;
@@ -37,6 +38,7 @@ contract voting{
                         candidate_name: "sachin",no_of_votes:0
                 }));
                 candidatescount = candidates.length;
+                
     }
     function getcandidates() public view returns (Candidates[] memory){
         return candidates;
@@ -44,15 +46,16 @@ contract voting{
     function register() public
     {   
         address voter = msg.sender;
-        require(block.timestamp<= starttime + 2 minutes);
+       // require(block.timestamp<= starttime + 1 minutes);
         require(voters[voter].voted == false);
         require(voters[voter].registered==false);
         voters[voter].weight = 1;
         voters[voter].registered = true;
+        voter_address.push(voter);
     }
 
     function voting_process(uint vo) public 
-    {       require(block.timestamp>= starttime + 2 minutes && block.timestamp<= starttime + 4 minutes);
+    {      // require(block.timestamp>= starttime + 1 minutes && block.timestamp<= starttime + 2 minutes);
             require(voters[msg.sender].weight !=0);
             require(!voters[msg.sender].voted);
 
@@ -64,19 +67,11 @@ contract voting{
             
     }
 
-    function reveal_winner() public view  returns (uint winning_candidate)
-    {   require(block.timestamp>=starttime + 5 minutes);
-    require(tiebreakers.length == 1);
-        uint winningvotecounts = 0;
-        for(uint i=0;i<candidates.length;i++)
-        {
-                if(winningvotecounts<candidates[i].no_of_votes)
-                {
-                    winningvotecounts = candidates[i].no_of_votes;
-                    winning_candidate = i;
-                }
-               
-        }
+    function reveal_winner() public   
+    {  // require(block.timestamp>=starttime + 3 minutes);
+   
+       
+        tiecalculate();
         
       
     }
@@ -107,14 +102,39 @@ contract voting{
     }
 
    
-    function tie(uint v) public
+   /* function tie(uint v) public
     {
         require(msg.sender == chairperson);
         require(tiebreakers.length>1);
         
         candidates[v].no_of_votes += 1;
-    }
+    }*/
     
+    function reset() public 
+    {
+        candidatescount = 0;
+        starttime = 0;
+        
+        for(uint256 i=0;i<candidates.length;i++)
+        {
+            delete candidates[i];
+            
+        }
+        for(uint256 i=0;i<tiebreakers.length;i++)
+        {
+            
+            delete tiebreakers[i];
+        }
+        for(uint256 i=0;i<voter_address.length;i++)
+        {
+            delete voters[voter_address[i]];
+        }
+        
+        
+        
+    }
+
+
 
     
 }
