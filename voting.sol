@@ -24,29 +24,36 @@ contract voting{
     address[] public voter_address;
     uint public candidatescount;
     uint public starttime;
-   
-   
+   bool isset = false;
+   bool isstarted = false;
     constructor()  {
-            starttime = block.timestamp;
-            chairperson = msg.sender;
-            voters[chairperson].weight = 1;
             
-            candidates.push(Candidates({
-                        candidate_name: "yatin",no_of_votes:0
-                }));
-                candidates.push(Candidates({
-                        candidate_name: "sachin",no_of_votes:0
-                }));
-                candidatescount = candidates.length;
+            chairperson = msg.sender;
+            
                 
     }
-    function getcandidates() public view returns (Candidates[] memory){
-        return candidates;
+    function set(uint no_of_voters) public {
+        require(msg.sender==chairperson);
+        require(isset==false);
+        for(uint i=0;i<no_of_voters;i++)
+        {
+            candidates.push(Candidates({
+                        candidate_name: "candidate",no_of_votes:0
+                }));
+        }
+        candidatescount = no_of_voters;
+    }
+    function start() public{
+        require(msg.sender==chairperson);
+        require(isstarted==false);
+        starttime = block.timestamp;
     }
     function register() public
-    {   
+    {   require(msg.sender!=chairperson);  
+    require(isset==true);
+    require(isstarted==true);
         address voter = msg.sender;
-       // require(block.timestamp<= starttime + 1 minutes);
+       require(block.timestamp<= starttime + 1 minutes);
         require(voters[voter].voted == false);
         require(voters[voter].registered==false);
         voters[voter].weight = 1;
@@ -55,7 +62,7 @@ contract voting{
     }
 
     function voting_process(uint vo) public 
-    {      // require(block.timestamp>= starttime + 1 minutes && block.timestamp<= starttime + 2 minutes);
+    {      require(block.timestamp>= starttime + 1 minutes && block.timestamp<= starttime + 2 minutes);
             require(voters[msg.sender].weight !=0);
             require(!voters[msg.sender].voted);
 
@@ -68,7 +75,7 @@ contract voting{
     }
 
     function reveal_winner() public   
-    {  // require(block.timestamp>=starttime + 3 minutes);
+    {  require(block.timestamp>=starttime + 3 minutes);
    
        
         tiecalculate();
@@ -114,7 +121,8 @@ contract voting{
     {
         candidatescount = 0;
         starttime = 0;
-        
+        isstarted = false;
+        isset = false;
         for(uint256 i=0;i<candidates.length;i++)
         {
             delete candidates[i];
@@ -133,8 +141,3 @@ contract voting{
         
         
     }
-
-
-
-    
-}
