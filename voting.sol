@@ -42,6 +42,7 @@ contract voting{
                 }));
         }
         candidatescount = no_of_voters;
+        isset = true;
     }
     function start() public{
         require(msg.sender==chairperson);
