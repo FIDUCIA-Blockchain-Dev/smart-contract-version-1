@@ -60,7 +60,7 @@ reveal_winner_time = rev;
     require(isset==true);
     require(isstarted==true);
         address voter = msg.sender;
-       require(block.timestamp<= starttime + register_time minutes);
+       require(block.timestamp<= starttime + 1 minutes);
         require(voters[voter].voted == false);
         require(voters[voter].registered==false);
         voters[voter].weight = 1;
@@ -69,7 +69,7 @@ reveal_winner_time = rev;
     }
 
     function voting_process(uint vo) public 
-    {      require(block.timestamp>= starttime + register_time minutes && block.timestamp<= starttime + voting_time minutes);
+    {      require(block.timestamp>= starttime + 1 minutes && block.timestamp<= starttime + 2 minutes);
             require(voters[msg.sender].weight !=0);
             require(!voters[msg.sender].voted);
 
@@ -82,7 +82,7 @@ reveal_winner_time = rev;
     }
 
     function reveal_winner() public   
-    {  require(block.timestamp>=starttime + reveal_winner_time minutes);
+    {  require(block.timestamp>=starttime + 3 minutes);
    
        
         tiecalculate();
@@ -148,3 +148,4 @@ reveal_winner_time = rev;
         
         
     }
+}
