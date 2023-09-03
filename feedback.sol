@@ -78,7 +78,7 @@ contract Feedback {
 }
 
 function reset() public 
-{
+{   require(msg.sender==chairperson,"the user is not chairperson");
     start = false;
     //Questions_And_Answers
     //users
