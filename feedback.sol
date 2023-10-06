@@ -1,6 +1,6 @@
 pragma solidity ^0.8.17;
 // SPDX-License-Identifier: GPL-3.0
-contract Feedback {
+contract feedback {
     address public chairperson;
    
     string[] public Questions;
@@ -16,6 +16,12 @@ contract Feedback {
         
         bool registered;
     }
+    struct answers_with_question
+    {
+        uint question_no;
+        string[4] answers;
+    }
+    answers_with_question[] public Answers_with_Question;
     bool public start = false;
     address[] registered_users;
     mapping(address=>User) public users;
@@ -24,13 +30,24 @@ contract Feedback {
     }
 
     function Start() public {
-        require(!start, "already started");
+        //require(!start, "already started");
         start = true;
     }
 
     function questions_input(string calldata question) public {
         require(start, "Question input is not allowed before starting.");
+        require(msg.sender==chairperson,"only chairperson is allowed to input question");
         Questions.push(question);
+    }
+    function answers_input(uint q_no,string[4] memory answer) public {
+        require(start, "Question input is not allowed before starting.");
+         require(msg.sender==chairperson,"only chairperson is allowed to input options");
+         require(q_no >= 0 && q_no < Questions.length, "Invalid question number");
+         Answers_with_Question.push(answers_with_question({
+            question_no:q_no,
+            answers:answer
+         }));
+
     }
     function register() public 
     {     
