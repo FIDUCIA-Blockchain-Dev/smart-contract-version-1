@@ -20,6 +20,7 @@ contract feedback {
     {
         uint question_no;
         string[4] answers;
+        string type_of_answer;
     }
     answers_with_question[] public Answers_with_Question;
     bool public start = false;
@@ -39,13 +40,14 @@ contract feedback {
         require(msg.sender==chairperson,"only chairperson is allowed to input question");
         Questions.push(question);
     }
-    function answers_input(uint q_no,string[4] memory answer) public {
+    function answers_input(uint q_no,string[4] memory answer,string memory t) public {
         require(start, "Question input is not allowed before starting.");
          require(msg.sender==chairperson,"only chairperson is allowed to input options");
          require(q_no >= 0 && q_no < Questions.length, "Invalid question number");
          Answers_with_Question.push(answers_with_question({
             question_no:q_no,
-            answers:answer
+            answers:answer,
+            type_of_answer:t
          }));
 
     }
