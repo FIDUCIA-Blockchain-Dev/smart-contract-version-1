@@ -112,6 +112,10 @@ function reset() public
     {
         delete Questions[i];
     }
+    for(uint i=0;i<Answers_with_Question.length;i++)
+    {
+        delete Answers_with_Question[i];
+    }
   
 }
 
