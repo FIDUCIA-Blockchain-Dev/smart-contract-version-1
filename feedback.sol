@@ -18,7 +18,7 @@ contract feedback {
     }
     struct answers_with_question
     {
-        uint question_no;
+        uint  question_no;
         string[4] answers;
         string type_of_answer;
     }
@@ -94,6 +94,39 @@ contract feedback {
     }
 
     return answer;
+}
+function get_Questions(uint q_no) public view returns(string memory) {
+     require(q_no >= 0 && q_no < Questions.length, "Invalid question number");
+    return Questions[q_no];
+}
+
+function get_options(uint q_no) public view returns (string[4] memory){
+    require(q_no >= 0 && q_no < Questions.length, "Invalid question number");
+    string[4] memory opt;
+    for(uint i=0;i<Questions_And_Answers.length;i++)
+    {
+        if(Answers_with_Question[i].question_no==q_no)
+        {
+            opt = Answers_with_Question[i].answers;
+            break;
+        }
+
+    }
+    return opt;
+}
+function get_type(uint q_no) public view returns (string memory){
+    string memory opt1;
+    for(uint i=0;i<Questions_And_Answers.length;i++)
+    {
+        if(Answers_with_Question[i].question_no==q_no)
+        {
+            opt1 = Answers_with_Question[i].type_of_answer;
+            break;
+        }
+
+    }
+    return opt1;
+
 }
 
 function reset() public 
