@@ -19,13 +19,14 @@ contract feedback {
     struct answers_with_question
     {
         uint  question_no;
-        string[4] answers;
+        string[] answers;
         string type_of_answer;
     }
     answers_with_question[] public Answers_with_Question;
     bool public start = false;
     address[] registered_users;
     mapping(address=>User) public users;
+    bool isReset = false;
     constructor() {
         chairperson = msg.sender;
     }
@@ -34,23 +35,43 @@ contract feedback {
         //require(!start, "already started");
         start = true;
     }
-
-    function questions_input(string calldata question) public {
-        require(start, "Question input is not allowed before starting.");
-        require(msg.sender==chairperson,"only chairperson is allowed to input question");
-        Questions.push(question);
+    function set_isReset(bool a) public {
+        isReset = a;
     }
-    function answers_input(uint q_no,string[4] memory answer,string memory t) public {
-        require(start, "Question input is not allowed before starting.");
-         require(msg.sender==chairperson,"only chairperson is allowed to input options");
-         require(q_no >= 0 && q_no < Questions.length, "Invalid question number");
-         Answers_with_Question.push(answers_with_question({
-            question_no:q_no,
-            answers:answer,
-            type_of_answer:t
-         }));
-
+    function get_isReset() public view returns (bool) {
+        return isReset;
     }
+    function no_of_q() public view returns (uint){
+        return Questions.length;
+    }
+    function questions_input(string[] calldata questions, uint no_of_q1) public {
+    require(start, "Question input is not allowed before starting.");
+    require(msg.sender == chairperson, "Only chairperson is allowed to input questions.");
+    require(questions.length == no_of_q1, "Number of questions must match the specified length.");
+
+    for (uint i = 0; i < no_of_q1; i++) {
+        Questions.push(questions[i]);
+    }
+}
+   // Define a mapping to store answers for each question
+mapping(uint => answers_with_question) public AnswersMap;
+ uint[] public keys; // This array will store the keys
+function answers_input(uint no_of_q2, string[][] memory options, string memory t) public {
+    require(start, "Question input is not allowed before starting.");
+    require(msg.sender == chairperson, "Only chairperson is allowed to input options.");
+    require(no_of_q2 > 0, "Number of questions must be greater than zero.");
+    require(options.length == no_of_q2, "Number of question options arrays must match the specified number of questions.");
+
+    for (uint i = 0; i < no_of_q2; i++) {
+        AnswersMap[i] = answers_with_question({
+            question_no: i,
+            answers: options[i],
+            type_of_answer: t
+        });
+        keys.push(i);
+    }
+}
+
     function register() public 
     {     
           address person = msg.sender;
@@ -63,16 +84,24 @@ contract feedback {
         registered_users.push(person);
 
     }
-    function answers(uint question_no,string calldata answer1) public {
-        require(question_no >= 0 && question_no < Questions.length, "Invalid question number");
-         address person = msg.sender;
-         require(users[person].registered==true,"user is not registered");
-         require(start, "cannot answer before starting");
-         Questions_And_Answers.push(questions_and_answers({
-             question:question_no,
-             answer:answer1
-         }));
+   function answers(uint[] calldata question_nos, string[][] calldata answers1) public {
+    require(question_nos.length == answers1.length, "Number of questions and answer arrays must match.");
+    require(start, "Cannot answer before starting.");
+    address person = msg.sender;
+    require(users[person].registered == true, "User is not registered.");
+    
+    for (uint i = 0; i < question_nos.length; i++) {
+        require(question_nos[i] >= 0 && question_nos[i] < Questions.length, "Invalid question number");
+        
+        // Store each question and its answers
+        for (uint j = 0; j < answers1[i].length; j++) {
+            Questions_And_Answers.push(questions_and_answers({
+                question: question_nos[i],
+                answer: answers1[i][j]
+            }));
+        }
     }
+}
   function getAnswersForQuestion(uint question_no) public view returns (string[] memory) {
     require(question_no >= 0 && question_no < Questions.length, "Invalid question number");
     require(msg.sender == chairperson, "The user is not a chairperson");
@@ -100,58 +129,65 @@ function get_Questions(uint q_no) public view returns(string memory) {
     return Questions[q_no];
 }
 
-function get_options(uint q_no) public view returns (string[4] memory){
+function get_options(uint q_no) public view returns (string[] memory){
     require(q_no >= 0 && q_no < Questions.length, "Invalid question number");
-    string[4] memory opt;
-    for(uint i=0;i<Questions_And_Answers.length;i++)
-    {
-        if(Answers_with_Question[i].question_no==q_no)
-        {
-            opt = Answers_with_Question[i].answers;
-            break;
-        }
-
-    }
-    return opt;
+    
+   return AnswersMap[q_no].answers;
 }
 function get_type(uint q_no) public view returns (string memory){
-    string memory opt1;
-    for(uint i=0;i<Questions_And_Answers.length;i++)
-    {
-        if(Answers_with_Question[i].question_no==q_no)
-        {
-            opt1 = Answers_with_Question[i].type_of_answer;
-            break;
-        }
-
-    }
-    return opt1;
+    return AnswersMap[q_no].type_of_answer;
 
 }
 
 function reset() public 
 {   require(msg.sender==chairperson,"the user is not chairperson");
+isReset = true;
     start = false;
     //Questions_And_Answers
     //users
     //Questions
-    for(uint i=0;i<Questions_And_Answers.length;i++)
+   /* for(uint i=0;i<Questions_And_Answers.length;i++)
     {
         delete Questions_And_Answers[i];
+    }*/
+    while(Questions_And_Answers.length>0)
+    {
+        Questions_And_Answers.pop();
     }
+    
     for(uint i=0;i<registered_users.length;i++)
     {
         delete users[registered_users[i]];
     }
-    for(uint i=0;i<Questions.length;i++)
+    /*for(uint i=0;i<Questions.length;i++)
     {
         delete Questions[i];
+    }*/
+    while(Questions.length>0)
+    {
+        Questions.pop();
     }
-    for(uint i=0;i<Answers_with_Question.length;i++)
+    
+    /*for(uint i=0;i<Answers_with_Question.length;i++)
     {
         delete Answers_with_Question[i];
+    }*/
+    while(Answers_with_Question.length>0)
+    {
+        Answers_with_Question.pop();
     }
-  
+   
+     // Iterate through the keys and delete the values
+        for (uint i = 0; i < keys.length; i++) {
+            delete AnswersMap[keys[i]];
+        }
+        // Clear the keys array
+        //delete keys;
+        while(keys.length>0)
+        {
+            keys.pop();
+        }
+        
 }
 
 }
