@@ -18,7 +18,24 @@ contract voting{
         
         uint no_of_votes;
     }
-
+    struct ballot{
+         mapping(address=>Voters)  voters;
+        uint ballotid;
+        Candidates[]   candidates;
+        Candidates[]  tiebreakers;
+        address[] voter_address;
+         uint  candidatescount;
+    uint  starttime;
+   bool isset ;
+   bool isstarted ;
+    bool isstartedregister ;
+    bool isstoppedregister ;
+    bool isstartedvoting ;
+    bool isstoppedvoting ;
+    bool isstartedreveal ;
+    }
+        mapping(uint => ballot) public ballots;
+    uint public currentBallotID = 0;
     Candidates[]  public candidates;
     Candidates[] public tiebreakers;
     address[] public voter_address;
@@ -37,6 +54,21 @@ contract voting{
             
                 
     }
+    function createBallot(uint no_of_voters) public{
+        require(msg.sender==chairperson);
+        uint ballotID = currentBallotID++;
+        require(ballots[ballotID].isset==false);
+         for(uint i=0;i<no_of_voters;i++)
+        {
+            ballots[ballotID].candidates.push(Candidates({
+                        candidate_name: "candidate",no_of_votes:0
+                }));
+        }
+        ballots[ballotID].candidatescount = no_of_voters;
+        ballots[ballotID].isset = true;
+
+
+    }
     function set(uint no_of_voters) public {
         require(msg.sender==chairperson);
         require(isset==false);
@@ -50,150 +82,150 @@ contract voting{
         isset = true;
 
     }
-    function get_isstarted() public view returns (bool) {
-        return isstarted;
+    function get_isstarted(uint ballotID) public view returns (bool) {
+        return ballots[ballotID].isstarted;
     }
-     function get_isset() public view returns (bool) {
-        return isset;
+     function get_isset(uint ballotID) public view returns (bool) {
+        return ballots[ballotID].isset;
     }
-     function get_isstartedregister() public view returns (bool) {
-        return isstartedregister;
+     function get_isstartedregister(uint ballotID) public view returns (bool) {
+        return ballots[ballotID].isstartedregister;
     }
-     function get_isstoppedregister() public view returns (bool) {
-        return isstoppedregister;
+     function get_isstoppedregister(uint ballotID) public view returns (bool) {
+        return ballots[ballotID].isstoppedregister;
     }
-     function get_isstartedvoting() public view returns (bool) {
-        return isstartedvoting;
+     function get_isstartedvoting(uint ballotID) public view returns (bool) {
+        return ballots[ballotID].isstartedvoting;
     }
-     function get_isstoppedvoting() public view returns (bool) {
-        return isstoppedvoting;
+     function get_isstoppedvoting(uint ballotID) public view returns (bool) {
+        return ballots[ballotID].isstoppedvoting;
     }
-     function get_isstartedreveal() public view returns (bool) {
-        return isstartedreveal;
+     function get_isstartedreveal(uint ballotID) public view returns (bool) {
+        return ballots[ballotID].isstartedreveal;
     }
     
-    function add_candidates(string[] memory arr) public {
-        for(uint i=0;i<candidatescount;i++)
+    function add_candidates(string[] memory arr,uint ballotID) public {
+        for(uint i=0;i<ballots[ballotID].candidatescount;i++)
         {
-            candidates[i].candidate_name = arr[i];
+            ballots[ballotID].candidates[i].candidate_name = arr[i];
         }
     }
-    function get_names(uint index) public view returns (string memory)  {
-        return candidates[index].candidate_name;
+    function get_names(uint index,uint ballotID) public view returns (string memory)  {
+        return ballots[ballotID].candidates[index].candidate_name;
     }
-    function get_winners_length() public view returns (uint ){
-        return tiebreakers.length;
+    function get_winners_length(uint ballotID) public view returns (uint ){
+        return ballots[ballotID].tiebreakers.length;
     }
-    function get_winners(uint index) public view returns (string memory) {
-        return tiebreakers[index].candidate_name;
+    function get_winners(uint index,uint ballotID) public view returns (string memory) {
+        return ballots[ballotID].tiebreakers[index].candidate_name;
     }
-    function start() public{
+    function start(uint ballotID) public{
         require(msg.sender==chairperson,"not chairperson");
-        require(isstarted==false ," started");
+        require(ballots[ballotID].isstarted==false ," started");
         starttime = block.timestamp;
-        isstarted = true;
+        ballots[ballotID].isstarted = true;
     }
 
-    function start_register() public {
+    function start_register(uint ballotID) public {
          require(msg.sender==chairperson,"chairperson");
-        isstartedregister = true;
+        ballots[ballotID].isstartedregister = true;
     }
-    function stop_register() public {
+    function stop_register(uint ballotID) public {
          require(msg.sender==chairperson,"chairperson");
-        isstartedregister = false;
-        isstoppedregister = true;
+        ballots[ballotID].isstartedregister = false;
+        ballots[ballotID].isstoppedregister = true;
     }
-    function start_voting() public {
+    function start_voting(uint ballotID) public {
          require(msg.sender==chairperson,"chairperson");
-        require(isstartedregister==false,"chairperson has  started register process");
-    require(isstoppedregister==true,"chairperson has not stopped register process");
-        isstartedvoting = true;
+        require(ballots[ballotID].isstartedregister==false,"chairperson has  started register process");
+    require(ballots[ballotID].isstoppedregister==true,"chairperson has not stopped register process");
+        ballots[ballotID].isstartedvoting = true;
     }
-    function stop_voting() public {
+    function stop_voting(uint ballotID) public {
          require(msg.sender==chairperson,"chairperson");
-             require(isstartedregister==false,"chairperson has  started register process");
-    require(isstoppedregister==true,"chairperson has not stopped register process");
-        isstartedvoting = false;
-        isstoppedvoting = true;
+             require(ballots[ballotID].isstartedregister==false,"chairperson has  started register process");
+    require(ballots[ballotID].isstoppedregister==true,"chairperson has not stopped register process");
+        ballots[ballotID].isstartedvoting = false;
+        ballots[ballotID].isstoppedvoting = true;
     }
-    function start_reveal() public {
+    function start_reveal(uint ballotID) public {
         require(msg.sender==chairperson,"chairperson");
-          require(isstartedregister==false,"chairperson has  started register process");
-    require(isstoppedregister==true,"chairperson has not stopped register process");
-    require(isstartedvoting==false,"chairperson has   started voting process");
-    require(isstoppedvoting==true,"chairperson has not  stopped voting process");
-            isstartedreveal = true;
+          require(ballots[ballotID].isstartedregister==false,"chairperson has  started register process");
+    require(ballots[ballotID].isstoppedregister==true,"chairperson has not stopped register process");
+    require(ballots[ballotID].isstartedvoting==false,"chairperson has   started voting process");
+    require(ballots[ballotID].isstoppedvoting==true,"chairperson has not  stopped voting process");
+            ballots[ballotID].isstartedreveal = true;
     }
-    function register() public
+    function register(uint ballotID) public
     {   require(msg.sender!=chairperson,"chairperson");
-    require(isstartedregister==true,"chairperson has not started register process");
-    require(isstoppedregister==false,"chairperson has stopped register process");
-    require(isstartedvoting==false,"chairperson has started voting process");
-    require(isstoppedvoting==false,"chairperson has stopped voting process");
-    require(isstartedreveal==false,"chairperson has started revealing the winners");   
-    require(isset==true,"chairpeson did not set");
-    require(isstarted==true,"chairperson did not start");
+    require(ballots[ballotID].isstartedregister==true,"chairperson has not started register process");
+    require(ballots[ballotID].isstoppedregister==false,"chairperson has stopped register process");
+    require(ballots[ballotID].isstartedvoting==false,"chairperson has started voting process");
+    require(ballots[ballotID].isstoppedvoting==false,"chairperson has stopped voting process");
+    require(ballots[ballotID].isstartedreveal==false,"chairperson has started revealing the winners");   
+    require(ballots[ballotID].isset==true,"chairpeson did not set");
+    require(ballots[ballotID].isstarted==true,"chairperson did not start");
         address voter = msg.sender;
       // require(block.timestamp<= starttime + register_time*1 minutes);
-        require(voters[voter].voted == false,"voter already voted");
-        require(voters[voter].registered==false,"already registered");
-        voters[voter].weight = 1;
-        voters[voter].registered = true;
-        voter_address.push(voter);
+        require(ballots[ballotID].voters[voter].voted == false,"voter already voted");
+        require(ballots[ballotID].voters[voter].registered==false,"already registered");
+        ballots[ballotID].voters[voter].weight = 1;
+        ballots[ballotID].voters[voter].registered = true;
+        ballots[ballotID].voter_address.push(voter);
     }
 
-    function voting_process(uint vo) public 
+    function voting_process(uint vo,uint ballotID) public 
     {     // require(block.timestamp>= starttime + register_time*1 minutes && block.timestamp<= starttime + voting_time*1 minutes);
-            require(voters[msg.sender].weight !=0,"voter not registered");
-            require(!voters[msg.sender].voted,"voter already voted");
+            require(ballots[ballotID].voters[msg.sender].weight !=0,"voter not registered");
+            require(!ballots[ballotID].voters[msg.sender].voted,"voter already voted");
              require(msg.sender!=chairperson,"chairperson");
-    require(isstartedregister==false,"chairperson has  started register process");
-    require(isstoppedregister==true,"chairperson has not stopped register process");
-    require(isstartedvoting==true,"chairperson has not  started voting process");
-    require(isstoppedvoting==false,"chairperson has stopped voting process");
-    require(isstartedreveal==false,"chairperson has started revealing the winners");  
+    require(ballots[ballotID].isstartedregister==false,"chairperson has  started register process");
+    require(ballots[ballotID].isstoppedregister==true,"chairperson has not stopped register process");
+    require(ballots[ballotID].isstartedvoting==true,"chairperson has not  started voting process");
+    require(ballots[ballotID].isstoppedvoting==false,"chairperson has stopped voting process");
+    require(ballots[ballotID].isstartedreveal==false,"chairperson has started revealing the winners");  
             
             
-                voters[msg.sender].vote = vo;
-                voters[msg.sender].voted = true;
-                candidates[vo].no_of_votes += 1;
+                ballots[ballotID].voters[msg.sender].vote = vo;
+                ballots[ballotID].voters[msg.sender].voted = true;
+                ballots[ballotID].candidates[vo].no_of_votes += 1;
             
     }
 
-    function reveal_winner() public   
+    function reveal_winner(uint ballotID) public   
     {  //require(block.timestamp>=starttime + reveal_winner_time*1 minutes);
          require(msg.sender!=chairperson,"chairperson");
-    require(isstartedregister==false,"chairperson has  started register process");
-    require(isstoppedregister==true,"chairperson has not stopped register process");
-    require(isstartedvoting==false,"chairperson has   started voting process");
-    require(isstoppedvoting==true,"chairperson has not  stopped voting process");
-    require(isstartedreveal==true,"chairperson has not started revealing the winners");   
+    require(ballots[ballotID].isstartedregister==false,"chairperson has  started register process");
+    require(ballots[ballotID].isstoppedregister==true,"chairperson has not stopped register process");
+    require(ballots[ballotID].isstartedvoting==false,"chairperson has   started voting process");
+    require(ballots[ballotID].isstoppedvoting==true,"chairperson has not  stopped voting process");
+    require(ballots[ballotID].isstartedreveal==true,"chairperson has not started revealing the winners");   
        
-        tiecalculate();
+        tiecalculate(ballotID);
         
       
     }
-    function tiecalculate() public
+    function tiecalculate(uint ballotID) public
     {
         uint winningvotecounts = 0;
       
-        for(uint i=0;i<candidates.length;i++)
+        for(uint i=0;i<ballots[ballotID].candidates.length;i++)
         {
-                if(winningvotecounts<candidates[i].no_of_votes)
+                if(winningvotecounts<ballots[ballotID].candidates[i].no_of_votes)
                 {
-                    winningvotecounts = candidates[i].no_of_votes;
+                    winningvotecounts = ballots[ballotID].candidates[i].no_of_votes;
                    
                 }
                
         }
        
-        for(uint i=0;i<candidates.length;i++)
+        for(uint i=0;i<ballots[ballotID].candidates.length;i++)
         {
-            if(winningvotecounts == candidates[i].no_of_votes)
+            if(winningvotecounts == ballots[ballotID].candidates[i].no_of_votes)
             {
                 tiebreakers.push(Candidates({
-                    candidate_name: candidates[i].candidate_name,
-                    no_of_votes: candidates[i].no_of_votes
+                    candidate_name: ballots[ballotID].candidates[i].candidate_name,
+                    no_of_votes: ballots[ballotID].candidates[i].no_of_votes
                 }));
             }
         }
@@ -208,43 +240,31 @@ contract voting{
         candidates[v].no_of_votes += 1;
     }*/
     
-    function reset() public 
+    function reset(uint ballotID) public 
     {
         candidatescount = 0;
         starttime = 0;
-        isstarted = false;
-        isset = false;
-        while(candidates.length>0)
-    {
-        candidates.pop();
-    }
-        /*for(uint256 i=0;i<candidates.length;i++)
+        ballots[ballotID].isstarted = false;
+        ballots[ballotID].isset = false;
+        for(uint256 i=0;i<ballots[ballotID].candidates.length;i++)
         {
-            delete candidates[i];
+            delete ballots[ballotID].candidates[i];
             
-        }*/
-       /* for(uint256 i=0;i<tiebreakers.length;i++)
+        }
+        for(uint256 i=0;i<ballots[ballotID].tiebreakers.length;i++)
         {
             
-            delete tiebreakers[i];
-        }*/
-              while(tiebreakers.length>0)
-    {
-        tiebreakers.pop();
-    }
-                while(voter_address.length>0)
-    {
-        voter_address.pop();
-    }
-        /*for(uint256 i=0;i<voter_address.length;i++)
+            delete ballots[ballotID].tiebreakers[i];
+        }
+        for(uint256 i=0;i<ballots[ballotID].voter_address.length;i++)
         {
-            delete voters[voter_address[i]];
-        }*/
-    isstartedregister = false;
-    isstoppedregister = false;
-    isstartedvoting = false;
-    isstoppedvoting = false;
-    isstartedreveal = false;
+            delete ballots[ballotID].voters[ballots[ballotID].voter_address[i]];
+        }
+    ballots[ballotID].isstartedregister = false;
+    ballots[ballotID].isstoppedregister = false;
+    ballots[ballotID].isstartedvoting = false;
+    ballots[ballotID].isstoppedvoting = false;
+    ballots[ballotID].isstartedreveal = false;
         
         
         
