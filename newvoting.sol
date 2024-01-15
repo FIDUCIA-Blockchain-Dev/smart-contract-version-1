@@ -16,6 +16,9 @@ contract Voting{
         uint candidateNo;
         
         uint no_of_votes;
+        string candidateName;
+        
+        string candidatedescription;
     }
     uint registerFrom;
     uint registerTo;
@@ -26,21 +29,49 @@ contract Voting{
         Candidates[]  public candidates;
     Candidates[] public tiebreakers;
      uint public candidatescount;
+     uint public StartRegisterTime;
+     uint public StopRegisterTime;
+     uint public StartVotingTime;
+     uint public StopVotingTime;
+     uint public StartResultTime;
+     string[] public RegNo;
+     string[]  public Phone;
+     string[] public Email;
+   
      mapping(address=>Voters) public voters;
-     constructor(){
+     constructor(uint NoOfCandidates,uint startregistertime,uint stopregistertime,
+     uint startvotingtime,uint stopvotingtime,uint startresultstime){
         chairperson = msg.sender;
-     }
-     function set(uint noOfCandidates) public {
-        require(msg.sender==chairperson,"the user is not chairperson");
-        candidatescount = noOfCandidates;
-        for(uint i=0;i<noOfCandidates;i++)
-        {
-             candidates.push(Candidates({
-                candidateNo: i,
-                no_of_votes: 0
-            }));
+         candidatescount = NoOfCandidates;
+         StartRegisterTime = startregistertime;
+         StopRegisterTime =stopregistertime;
+         StartVotingTime = startvotingtime;
+         StopVotingTime = stopvotingtime;
+         StartResultTime = startresultstime;
 
+     }
+     function set(string[] memory regNo,string[
+] memory phone,string[] memory email,string[] memory candidateNames,string[] memory candidateDesc) public {
+        require(msg.sender==chairperson,"the user is not chairperson");
+        for(uint i=0;i<candidatescount;i++)
+        {
+            candidates.push(
+                Candidates({
+                    candidateNo:i,
+                    no_of_votes:0,
+                    candidateName:candidateNames[i],
+                    
+                    candidatedescription:candidateDesc[i]
+
+
+
+                })
+            );
         }
+        RegNo = regNo;
+        Phone = phone;
+        Email = email;
+       
 
      }
      function register() public{
@@ -77,13 +108,17 @@ contract Voting{
                
         }
        
-        for(uint i=0;i<candidates.length;i++)
+       for(uint i=0;i<candidates.length;i++)
         {
             if(winningvotecounts == candidates[i].no_of_votes)
             {
                 tiebreakers.push(Candidates({
                     candidateNo: candidates[i].candidateNo,
-                    no_of_votes: candidates[i].no_of_votes
+                    no_of_votes: candidates[i].no_of_votes,
+                      candidateName:candidates[i].candidateName,
+                   
+                    candidatedescription:candidates[i].candidatedescription
+
                 }));
             }
         }
