@@ -39,20 +39,21 @@ contract Voting{
      string[] public Email;
    
      mapping(address=>Voters) public voters;
-     constructor(uint NoOfCandidates,uint startregistertime,uint stopregistertime,
-     uint startvotingtime,uint stopvotingtime,uint startresultstime){
+     constructor(){
         chairperson = msg.sender;
-         candidatescount = NoOfCandidates;
+         
+     }
+     function set(string[] memory regNo,string[
+] memory phone,string[] memory email,string[] memory candidateNames,string[] memory candidateDesc,uint NoOfCandidates,uint startregistertime,uint stopregistertime,
+     uint startvotingtime,uint stopvotingtime,uint startresultstime) public {
+        require(msg.sender==chairperson,"the user is not chairperson");
+        candidatescount = NoOfCandidates;
          StartRegisterTime = startregistertime;
          StopRegisterTime =stopregistertime;
          StartVotingTime = startvotingtime;
          StopVotingTime = stopvotingtime;
          StartResultTime = startresultstime;
 
-     }
-     function set(string[] memory regNo,string[
-] memory phone,string[] memory email,string[] memory candidateNames,string[] memory candidateDesc) public {
-        require(msg.sender==chairperson,"the user is not chairperson");
         for(uint i=0;i<candidatescount;i++)
         {
             candidates.push(
@@ -73,6 +74,18 @@ contract Voting{
         Email = email;
        
 
+     }
+     function getLengthRegNo() public view returns(uint)
+     {
+        return RegNo.length;
+     }
+     function getLengthPhone() public view returns(uint)
+     {
+        return Phone.length;
+     }
+     function getLengthEmail() public view returns(uint)
+     {
+        return Email.length;
      }
      function register() public{
         require(msg.sender!=chairperson,"the user is the chairperson");
